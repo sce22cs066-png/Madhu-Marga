@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.ownerId == request.auth.uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+    
+    // Hive Validation
+    function isValidHive(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.location is string && data.location.size() > 0 && data.location.size() <= 200 &&
+             data.status in ['active', 'failing', 'harvested', 'inactive'] &&
+             data.ownerId == request.auth.uid;
+    }
+
+    // Inspection Validation
+    function isValidInspection(data) {
+      return data.hiveId is string && isValidId(data.hiveId) &&
+             data.date is timestamp &&
+             data.activityLevel in ['high', 'medium', 'low'] &&
+             (data.honeyFlowProgress == null || (data.honeyFlowProgress >= 0 && data.honeyFlowProgress <= 100)) &&
+             data.ownerId == request.auth.uid;
+    }
+
+    // Harvest Validation
+    function isValidHarvest(data) {
+      return data.hiveId is string && isValidId(data.hiveId) &&
+             data.date is timestamp &&
+             data.quantity is number && data.quantity >= 0 &&
+             data.ownerId == request.auth.uid;
+    }
+
+    // --- Collections ---
+
+    match /hives/{hiveId} {
+      allow read: if isOwner(existing());
+      allow create: if isSignedIn() && isValidId(hiveId) && isValidHive(incoming()) && 
+                      incoming().keys().hasAll(['name', 'location', 'status', 'ownerId', 'createdAt']) &&
+                      incoming().createdAt == request.time;
+      allow update: if isOwner(existing()) && isValidHive(incoming()) &&
+                      incoming().ownerId == existing().ownerId &&
+                      incoming().createdAt == existing().createdAt &&
+                      (
+                        // Action: Update details/status
+                        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'location', 'status'])
+                      );
+      allow delete: if isOwner(existing());
+    }
+
+    match /inspections/{inspectionId} {
+      allow read: if isOwner(existing());
+      allow create: if isSignedIn() && isValidId(inspectionId) && isValidInspection(incoming()) &&
+                      get(/databases/$(database)/documents/hives/$(incoming().hiveId)).data.ownerId == request.auth.uid;
+      allow update: if isOwner(existing()) && isValidInspection(incoming()) &&
+                      incoming().hiveId == existing().hiveId &&
+                      incoming().ownerId == existing().ownerId;
+      allow delete: if isOwner(existing());
+    }
+
+    match /harvests/{harvestId} {
+      allow read: if isOwner(existing());
+      allow create: if isSignedIn() && isValidId(harvestId) && isValidHarvest(incoming()) &&
+                      get(/databases/$(database)/documents/hives/$(incoming().hiveId)).data.ownerId == request.auth.uid;
+      allow update: if false; // Harvests are generally immutable records
+      allow delete: if isOwner(existing());
+    }
+
+    match /flora/{floraId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Read-only for users
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Hive": {
+      "title": "Hive",
+      "description": "Represents a bee colony hive.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "failing", "harvested", "inactive"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["name", "location", "status", "ownerId"]
+    },
+    "Inspection": {
+      "title": "Inspection",
+      "description": "A record of a hive inspection.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "hiveId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "queenPresent": { "type": "boolean" },
+        "pestsSeen": { "type": "boolean" },
+        "activityLevel": { "type": "string", "enum": ["high", "medium", "low"] },
+        "honeyFlowProgress": { "type": "number", "description": "Percentage 0-100" },
+        "observations": { "type": "string" },
+        "aiIntervention": { "type": "string", "description": "AI generated advice" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["hiveId", "date", "activityLevel", "ownerId"]
+    },
+    "Harvest": {
+      "title": "Harvest",
+      "description": "A record of honey harvest from a hive.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "hiveId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "quantity": { "type": "number", "description": "Quantity in kg" },
+        "notes": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["hiveId", "date", "quantity", "ownerId"]
+    },
+    "Flora": {
+      "title": "Flora",
+      "description": "Regional flowers and their blooming seasons.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "bloomingSeason": { "type": "string" },
+        "description": { "type": "string" },
+        "benefitToBees": { "type": "string" }
+      },
+      "required": ["name", "bloomingSeason"]
+    }
+  },
+  "firestore": {
+    "/hives": {
+      "schema": "Hive",
+      "description": "Collection of all bee hives."
+    },
+    "/inspections": {
+      "schema": "Inspection",
+      "description": "Collection of hive inspection logs."
+    },
+    "/harvests": {
+      "schema": "Harvest",
+      "description": "Collection of honey harvest records."
+    },
+    "/flora": {
+      "schema": "Flora",
+      "description": "Reference collection for local bee-friendly flora."
+    }
+  }
+}
