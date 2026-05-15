@@ -108,19 +108,11 @@ The application aims to support sustainable farming and increase high-quality ho
 - Android SDK 24+
 - Kotlin Support Enabled
 
-## Clone the Repository
-
-```bash
-git clone
-https://github.com/sce22cs066-png/Madhu-Marga.git
-
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+# ▶️ Run Command
+Connect an Android device or start an emulator, then run:
+Bash
+Shift + F10
+OR
+Click:
+Plain text
+Run > Run 'app'
