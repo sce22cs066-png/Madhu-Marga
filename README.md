@@ -112,7 +112,17 @@ The application aims to support sustainable farming and increase high-quality ho
 Connect an Android device or start an emulator, then run:
 Bash
 Shift + F10
-OR
+(OR)
 Click:
 Plain text
 Run > Run 'app'
+
+# 🔗 Demo Link
+https://ais-pre-lo4tqt3yynx4tqroixnrax-505251065106.asia-southeast1.run.app
+
+# 🚀 Future Improvements
+- Real GenAI chatbot integration
+- Voice support in regional languages
+- Offline-first functionality
+- GPS-based flora recommendations
+- Cloud backup and synchronization
